@@ -8,11 +8,10 @@
     const total = state(0)
     const passing = state(0)
     const failing = state(0)
-    const activeTab = state('all')
+    const activeTab = state('stacksjs')
     const statusFilter = state('all')
 
     const tabs = state([
-      { id: 'all', label: 'All' },
       { id: 'stacksjs', label: 'stacksjs' },
       { id: 'home-lang', label: 'home-lang' },
       { id: 'mail-os', label: 'mail-os' },
@@ -23,8 +22,7 @@
     const repos = derived(() => {
       const tab = activeTab()
       const filter = statusFilter()
-      let list = allRepos()
-      if (tab !== 'all') list = list.filter(r => r.owner === tab)
+      let list = allRepos().filter(r => r.owner === tab)
       if (filter === 'passing') list = list.filter(r => r.status === 'success')
       if (filter === 'failing') list = list.filter(r => r.status === 'failure' || r.status === 'error')
       return list
@@ -32,12 +30,12 @@
 
     const tabPassing = derived(() => {
       const tab = activeTab()
-      const list = tab === 'all' ? allRepos() : allRepos().filter(r => r.owner === tab)
+      const list = allRepos().filter(r => r.owner === tab)
       return list.filter(r => r.status === 'success').length
     })
     const tabFailing = derived(() => {
       const tab = activeTab()
-      const list = tab === 'all' ? allRepos() : allRepos().filter(r => r.owner === tab)
+      const list = allRepos().filter(r => r.owner === tab)
       return list.filter(r => r.status === 'failure' || r.status === 'error').length
     })
     const tabTotal = derived(() => {
