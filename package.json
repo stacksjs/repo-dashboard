@@ -1,0 +1,19 @@
+{
+  "name": "repo-dashboard",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "A dashboard to monitor CI status across all Stacks codebases.",
+  "private": true,
+  "scripts": {
+    "dev": "bun --watch serve.ts",
+    "start": "bun serve.ts",
+    "typecheck": "bun tsc --noEmit"
+  },
+  "dependencies": {
+    "@cwcss/crosswind": "^0.2.0",
+    "@stacksjs/stx": "^0.2.10"
+  },
+  "devDependencies": {
+    "bun-plugin-stx": "^0.2.10"
+  }
+}
