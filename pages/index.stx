@@ -104,22 +104,11 @@
   </script>
 
   <div class="max-w-7xl mx-auto px-6 py-8">
-    <!-- Skeleton loading state -->
-    <div :if="loading" class="flex flex-col items-center justify-center" style="min-height: 60vh">
-      <div class="mb-8 text-center">
-        <div class="inline-flex items-center gap-3 mb-4">
-          <div class="w-5 h-5 border-2 border-zinc-300 dark:border-zinc-600 border-t-violet-500 dark:border-t-violet-400 rounded-full" style="animation: spin 0.8s linear infinite"></div>
-          <span class="text-zinc-500 dark:text-zinc-400 text-lg">Loading repositories...</span>
-        </div>
-        <p class="text-zinc-400 dark:text-zinc-600 text-sm">Fetching CI status from GitHub</p>
-      </div>
-      <div class="w-full max-w-3xl grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr))">
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
+    <!-- Loading state -->
+    <div :if="loading" class="flex items-center justify-center" style="min-height: 70vh">
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-8 h-8 border-2 border-zinc-300 dark:border-zinc-700 border-t-violet-500 rounded-full" style="animation: spin 0.7s linear infinite"></div>
+        <span class="text-zinc-400 dark:text-zinc-500 text-sm">Fetching CI status...</span>
       </div>
     </div>
 
