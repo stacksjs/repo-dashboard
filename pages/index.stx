@@ -52,19 +52,10 @@
       return 'border-color: transparent; color: #a1a1aa'
     }
 
-    function icon(status) {
-      if (status === 'success') return '\u2713'
-      if (status === 'failure' || status === 'error') return '\u2717'
-      if (status === 'pending') return '\u25CB'
-      return '\u2014'
-    }
-
-    function iconColor(status) {
-      if (status === 'success') return 'color: #34d399'
-      if (status === 'failure' || status === 'error') return 'color: #f87171'
-      if (status === 'pending') return 'color: #fbbf24'
-      return 'color: #52525b'
-    }
+    function isSuccess(status) { return status === 'success' }
+    function isFailing(status) { return status === 'failure' || status === 'error' }
+    function isPending(status) { return status === 'pending' }
+    function isNoRuns(status) { return status === 'no_runs' }
 
     function borderColor(status) {
       if (status === 'success') return 'border-color: rgba(16,185,129,0.3)'
@@ -167,7 +158,10 @@
           :style="borderColor(repo.status)"
           class="flex items-start gap-3 px-4 py-3 rounded-lg border bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
         >
-          <span :style="iconColor(repo.status)" class="text-base font-bold mt-0.5" :text="icon(repo.status)"></span>
+          <Icon name="check" size="16" class="text-emerald-500 mt-0.5" :show="isSuccess(repo.status)" />
+          <Icon name="x" size="16" class="text-red-500 mt-0.5" :show="isFailing(repo.status)" />
+          <Icon name="loader" size="16" class="text-yellow-500 mt-0.5" :show="isPending(repo.status)" />
+          <Icon name="minus" size="16" class="text-zinc-600 mt-0.5" :show="isNoRuns(repo.status)" />
 
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
