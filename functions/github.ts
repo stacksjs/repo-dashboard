@@ -44,7 +44,8 @@ async function fetchAllRepos(): Promise<Array<{ name: string, owner: string, ful
     }
   }
 
-  return allRepos.filter(r => !r.archived)
+  const IGNORED = new Set(['.github'])
+  return allRepos.filter(r => !r.archived && !IGNORED.has(r.name))
 }
 
 async function fetchRepoStatus(owner: string, name: string, defaultBranch: string): Promise<RepoStatus> {
