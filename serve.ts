@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import { serve } from 'bun-plugin-stx/serve'
-import { createApiRoutes } from './src/api'
+import { createApiRoutes } from './functions/api'
 
 const args = process.argv.slice(2)
 const portIdx = args.indexOf('--port')

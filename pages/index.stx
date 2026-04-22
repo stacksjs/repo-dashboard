@@ -1,72 +1,76 @@
-<div class="max-w-7xl mx-auto px-6 py-8">
-  <p :if="loading" class="text-zinc-500 text-sm">Loading repos...</p>
+@extends('layouts/default')
 
-  <p :if="error" class="text-red-400 text-sm">Failed to load: {{ error }}</p>
+@section('content')
+  <script client>
+    const repos = state([])
+    const loading = state(true)
+    const error = state('')
+    const total = state(0)
+    const passing = state(0)
+    const failing = state(0)
 
-  <div :if="!loading && !error" class="mb-6 flex items-center gap-4 text-sm text-zinc-400">
-    <span class="text-emerald-400 font-medium">{{ passing }} passing</span>
-    <span class="text-red-400 font-medium">{{ failing }} failing</span>
-    <span class="text-zinc-500">{{ total }} total</span>
+    function icon(status) {
+      if (status === 'success') return '\u2713'
+      if (status === 'failure' || status === 'error') return '\u2717'
+      if (status === 'pending') return '\u25CB'
+      return '\u2014'
+    }
+
+    function iconColor(status) {
+      if (status === 'success') return 'color: #34d399'
+      if (status === 'failure' || status === 'error') return 'color: #f87171'
+      if (status === 'pending') return 'color: #fbbf24'
+      return 'color: #52525b'
+    }
+
+    function borderColor(status) {
+      if (status === 'success') return 'border-color: rgba(16,185,129,0.3)'
+      if (status === 'failure' || status === 'error') return 'border-color: rgba(239,68,68,0.3)'
+      if (status === 'pending') return 'border-color: rgba(234,179,8,0.3)'
+      return 'border-color: rgba(39,39,42,1)'
+    }
+
+    onMount(async () => {
+      try {
+        const res = await fetch('/api/status')
+        if (!res.ok) throw new Error('HTTP ' + res.status)
+        const data = await res.json()
+        repos.set(data.repos)
+        total.set(data.total)
+        passing.set(data.passing)
+        failing.set(data.failing)
+      }
+      catch (e) {
+        error.set(String(e))
+      }
+      finally {
+        loading.set(false)
+      }
+    })
+  </script>
+
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <p :if="loading" class="text-zinc-500 text-sm">Loading repos...</p>
+
+    <p :if="error" class="text-red-400 text-sm">Failed to load: {{ error }}</p>
+
+    <div :if="!loading && !error" class="mb-6 flex items-center gap-4 text-sm text-zinc-400">
+      <span class="text-emerald-400 font-medium">{{ passing }} passing</span>
+      <span class="text-red-400 font-medium">{{ failing }} failing</span>
+      <span class="text-zinc-500">{{ total }} total</span>
+    </div>
+
+    <div :if="!loading && !error" class="flex flex-wrap gap-2">
+      <a
+        :for="repo in repos"
+        :href="repo.runUrl || repo.url"
+        target="_blank"
+        :style="borderColor(repo.status)"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg border bg-zinc-900 hover:bg-zinc-800 transition-colors no-underline"
+      >
+        <span :style="iconColor(repo.status)" class="text-sm font-bold" :text="icon(repo.status)"></span>
+        <span class="text-zinc-300 text-sm" :text="repo.name"></span>
+      </a>
+    </div>
   </div>
-
-  <div :if="!loading && !error" class="flex flex-wrap gap-2">
-    <a
-      :for="repo in repos"
-      :href="repo.runUrl || repo.url"
-      target="_blank"
-      :class="cardClass(repo.status)"
-      class="flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors no-underline"
-    >
-      <span :class="iconClass(repo.status)" class="text-sm font-bold" :text="icon(repo.status)"></span>
-      <span class="text-zinc-300 text-sm" :text="repo.name"></span>
-    </a>
-  </div>
-</div>
-
-<script client>
-  const repos = state([])
-  const loading = state(true)
-  const error = state('')
-  const total = state(0)
-  const passing = state(0)
-  const failing = state(0)
-
-  function icon(status) {
-    if (status === 'success') return '\u2713'
-    if (status === 'failure' || status === 'error') return '\u2717'
-    if (status === 'pending') return '\u25CB'
-    return '\u2014'
-  }
-
-  function iconClass(status) {
-    if (status === 'success') return 'text-emerald-400'
-    if (status === 'failure' || status === 'error') return 'text-red-400'
-    if (status === 'pending') return 'text-yellow-400'
-    return 'text-zinc-600'
-  }
-
-  function cardClass(status) {
-    if (status === 'success') return 'border-emerald-500/30 bg-zinc-900 hover:bg-zinc-800'
-    if (status === 'failure' || status === 'error') return 'border-red-500/30 bg-zinc-900 hover:bg-zinc-800'
-    if (status === 'pending') return 'border-yellow-500/30 bg-zinc-900 hover:bg-zinc-800'
-    return 'border-zinc-800 bg-zinc-900 hover:bg-zinc-800'
-  }
-
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/status')
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const data = await res.json()
-      repos.set(data.repos)
-      total.set(data.total)
-      passing.set(data.passing)
-      failing.set(data.failing)
-    }
-    catch (e) {
-      error.set(String(e))
-    }
-    finally {
-      loading.set(false)
-    }
-  })
-</script>
+@endsection

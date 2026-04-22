@@ -1,4 +1,4 @@
-import { createApiRoutes } from './src/api'
+import { createApiRoutes } from './functions/api'
 
 export default {
   app: {
