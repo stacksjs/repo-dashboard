@@ -10,13 +10,13 @@ const config: CloudConfig = {
   environments: {
     production: {
       type: 'production',
-      domain: 'status.stacksjs.com',
+      domain: 'repos.stacksjs.com',
     },
   },
 
   sites: {
     production: {
-      domain: 'status.stacksjs.com',
+      domain: 'repos.stacksjs.com',
       root: 'dist',
       build: 'bun run build',
     },
@@ -25,7 +25,7 @@ const config: CloudConfig = {
   infrastructure: {
     dns: {
       provider: 'route53',
-      domain: 'status.stacksjs.com',
+      domain: 'repos.stacksjs.com',
     },
   },
 }
