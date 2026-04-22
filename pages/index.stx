@@ -47,16 +47,7 @@
 
     function switchTab(id) {
       activeTab.set(id)
-      statusFilter.set('all')
     }
-
-    function setFilter(f) {
-      statusFilter.set(f)
-    }
-
-    function filterStyle(f) {
-      if (statusFilter() === f) return 'background: rgba(139,92,246,0.15); color: #c4b5fd; border-color: rgba(139,92,246,0.4)'
-      return 'background: transparent; border-color: transparent'
     }
 
     function tabStyle(id) {
@@ -107,6 +98,10 @@
     }
 
     onMount(async () => {
+      window.addEventListener('repo-filter', (e) => {
+        statusFilter.set(e.detail)
+      })
+
       try {
         const res = await fetch('/api/status')
         if (!res.ok) throw new Error('HTTP ' + res.status)
@@ -166,23 +161,11 @@
         ></button>
       </div>
 
-      <!-- Summary + filters -->
-      <div class="mb-5 flex items-center justify-between flex-wrap gap-3">
-        <div class="flex items-center gap-4 text-sm">
-          <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ tabPassing }} passing</span>
-          <span class="text-red-500 dark:text-red-400 font-medium">{{ tabFailing }} failing</span>
-          <span class="text-zinc-400 dark:text-zinc-500">{{ tabTotal }} total</span>
-        </div>
-
-        <div class="flex items-center gap-1">
-          <button @click="setFilter('all')" :style="filterStyle('all')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors">All</button>
-          <button @click="setFilter('passing')" :style="filterStyle('passing')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors">
-            Passing
-          </button>
-          <button @click="setFilter('failing')" :style="filterStyle('failing')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors">
-            Failing
-          </button>
-        </div>
+      <!-- Summary -->
+      <div class="mb-5 flex items-center gap-4 text-sm">
+        <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ tabPassing }} passing</span>
+        <span class="text-red-500 dark:text-red-400 font-medium">{{ tabFailing }} failing</span>
+        <span class="text-zinc-400 dark:text-zinc-500">{{ tabTotal }} total</span>
       </div>
 
       <!-- Repo grid -->

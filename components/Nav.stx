@@ -1,5 +1,6 @@
 <script client>
   const isDark = state(true)
+  const activeFilter = state('all')
 
   onMount(() => {
     const stored = localStorage.getItem('theme')
@@ -23,6 +24,16 @@
       localStorage.setItem('theme', 'light')
     }
   }
+
+  function setFilter(f) {
+    activeFilter.set(f)
+    window.dispatchEvent(new CustomEvent('repo-filter', { detail: f }))
+  }
+
+  function filterBtnClass(f) {
+    if (activeFilter() === f) return 'bg-violet-500/15 text-violet-400 border-violet-500/40'
+    return 'bg-transparent text-zinc-500 dark:text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-200'
+  }
 </script>
 
 <header class="border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
@@ -30,14 +41,18 @@
     <a href="/" class="flex items-center gap-3 no-underline">
       <span class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Repo Dashboard</span>
     </a>
-    <div class="flex items-center gap-3">
+
+    <div class="flex items-center gap-2">
+      <button @click="setFilter('all')" :class="filterBtnClass('all')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">All</button>
+      <button @click="setFilter('passing')" :class="filterBtnClass('passing')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">Passing</button>
+      <button @click="setFilter('failing')" :class="filterBtnClass('failing')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">Failing</button>
+
+      <div class="w-px h-5 bg-zinc-200 dark:bg-zinc-700 mx-1"></div>
+
       <button @click="toggleTheme()" class="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded transition-colors bg-transparent cursor-pointer">
         <Icon name="moon" size="18" :show="isDark" />
         <Icon name="sun" size="18" :show="!isDark" />
       </button>
-      <a href="https://github.com/stacksjs" target="_blank" class="text-zinc-500 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 text-sm no-underline">
-        github.com/stacksjs
-      </a>
     </div>
   </div>
 </header>
