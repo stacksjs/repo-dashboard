@@ -48,6 +48,29 @@ async function fetchAllRepos(): Promise<Array<{ name: string, owner: string, ful
   return allRepos.filter(r => !r.archived && !IGNORED.has(r.name))
 }
 
+async function fillLatestCommit(base: RepoStatus, owner: string, name: string, branch: string): Promise<void> {
+  try {
+    const res = await fetch(
+      `${GITHUB_API}/repos/${owner}/${name}/commits?sha=${branch}&per_page=1`,
+      { headers: headers() },
+    )
+    if (!res.ok) return
+
+    const commits = await res.json() as Array<{ sha: string, commit: { message: string, author: { name: string, date: string } | null }, author: { login: string } | null }>
+    if (commits.length === 0) return
+
+    const c = commits[0]
+    base.commitSha = c.sha.slice(0, 7)
+    base.commitMessage = c.commit.message.split('\n')[0]
+    base.commitUrl = `https://github.com/${owner}/${name}/commit/${c.sha}`
+    base.commitAuthor = c.commit.author?.name ?? c.author?.login ?? null
+    base.updatedAt = c.commit.author?.date ?? null
+  }
+  catch {
+    // ignore — commit info is optional
+  }
+}
+
 async function fetchRepoStatus(owner: string, name: string, defaultBranch: string): Promise<RepoStatus> {
   const base: RepoStatus = {
     name,
@@ -75,12 +98,14 @@ async function fetchRepoStatus(owner: string, name: string, defaultBranch: strin
 
     if (!res.ok) {
       base.status = 'error'
+      await fillLatestCommit(base, owner, name, defaultBranch)
       return base
     }
 
     const data = await res.json() as { workflow_runs: Array<{ status: string, conclusion: string | null, name: string, head_sha: string, head_commit: { message: string, author: { name: string } | null } | null, updated_at: string, html_url: string, actor: { login: string } | null }> }
 
     if (!data.workflow_runs || data.workflow_runs.length === 0) {
+      await fillLatestCommit(base, owner, name, defaultBranch)
       return base
     }
 
