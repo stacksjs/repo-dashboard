@@ -59,6 +59,9 @@ async function fetchRepoStatus(owner: string, name: string, defaultBranch: strin
     workflowName: null,
     commitSha: null,
     commitMessage: null,
+    commitUrl: null,
+    commitAuthor: null,
+    commitCount: null,
     updatedAt: null,
     runUrl: null,
   }
@@ -74,7 +77,7 @@ async function fetchRepoStatus(owner: string, name: string, defaultBranch: strin
       return base
     }
 
-    const data = await res.json() as { workflow_runs: Array<{ status: string, conclusion: string | null, name: string, head_sha: string, head_commit: { message: string } | null, updated_at: string, html_url: string }> }
+    const data = await res.json() as { workflow_runs: Array<{ status: string, conclusion: string | null, name: string, head_sha: string, head_commit: { message: string, author: { name: string } | null } | null, updated_at: string, html_url: string, actor: { login: string } | null }> }
 
     if (!data.workflow_runs || data.workflow_runs.length === 0) {
       return base
@@ -84,6 +87,8 @@ async function fetchRepoStatus(owner: string, name: string, defaultBranch: strin
     base.workflowName = run.name
     base.commitSha = run.head_sha.slice(0, 7)
     base.commitMessage = run.head_commit?.message.split('\n')[0] ?? null
+    base.commitUrl = `https://github.com/${owner}/${name}/commit/${run.head_sha}`
+    base.commitAuthor = run.head_commit?.author?.name ?? run.actor?.login ?? null
     base.updatedAt = run.updated_at
     base.runUrl = run.html_url
 

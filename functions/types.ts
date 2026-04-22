@@ -9,6 +9,9 @@ export interface RepoStatus {
   workflowName: string | null
   commitSha: string | null
   commitMessage: string | null
+  commitUrl: string | null
+  commitAuthor: string | null
+  commitCount: number | null
   updatedAt: string | null
   runUrl: string | null
 }
