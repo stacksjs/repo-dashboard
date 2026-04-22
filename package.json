@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "bun --watch serve.ts",
     "build": "bun build.ts",
+    "preview": "bun preview.ts",
     "start": "bun serve.ts",
     "typecheck": "bun tsc --noEmit"
   },
