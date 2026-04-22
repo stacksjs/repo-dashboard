@@ -1,3 +1,9 @@
+export interface FailedJob {
+  name: string
+  conclusion: string
+  url: string
+}
+
 export interface RepoStatus {
   name: string
   owner: string
@@ -14,6 +20,7 @@ export interface RepoStatus {
   commitCount: number | null
   updatedAt: string | null
   runUrl: string | null
+  failedJobs: FailedJob[]
 }
 
 export interface DashboardData {

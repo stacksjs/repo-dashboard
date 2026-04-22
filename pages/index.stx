@@ -166,6 +166,18 @@
             <div :if="repo.commitAuthor" class="mt-0.5">
               <span class="text-zinc-400 dark:text-zinc-600 text-xs" :text="repo.commitAuthor"></span>
             </div>
+
+            <div :if="repo.failedJobs && repo.failedJobs.length > 0" class="mt-2 pt-2 border-t border-red-500/10">
+              <a
+                :for="job in repo.failedJobs"
+                :href="job.url"
+                target="_blank"
+                class="flex items-center gap-1.5 mt-1 no-underline hover:underline group"
+              >
+                <Icon name="x-circle" size="12" class="text-red-400/70" />
+                <span class="text-red-400/80 dark:text-red-400/70 text-xs" :text="job.name"></span>
+              </a>
+            </div>
           </div>
         </div>
       </div>

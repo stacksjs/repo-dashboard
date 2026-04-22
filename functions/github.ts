@@ -71,6 +71,24 @@ async function fillLatestCommit(base: RepoStatus, owner: string, name: string, b
   }
 }
 
+async function fetchFailedJobs(owner: string, name: string, runId: number): Promise<Array<{ name: string, conclusion: string, url: string }>> {
+  try {
+    const res = await fetch(
+      `${GITHUB_API}/repos/${owner}/${name}/actions/runs/${runId}/jobs?filter=latest`,
+      { headers: headers() },
+    )
+    if (!res.ok) return []
+
+    const data = await res.json() as { jobs: Array<{ name: string, conclusion: string | null, html_url: string }> }
+    return data.jobs
+      .filter(j => j.conclusion && j.conclusion !== 'success' && j.conclusion !== 'skipped')
+      .map(j => ({ name: j.name, conclusion: j.conclusion!, url: j.html_url }))
+  }
+  catch {
+    return []
+  }
+}
+
 async function fetchRepoStatus(owner: string, name: string, defaultBranch: string): Promise<RepoStatus> {
   const base: RepoStatus = {
     name,
@@ -88,6 +106,7 @@ async function fetchRepoStatus(owner: string, name: string, defaultBranch: strin
     commitCount: null,
     updatedAt: null,
     runUrl: null,
+    failedJobs: [],
   }
 
   try {
@@ -102,7 +121,7 @@ async function fetchRepoStatus(owner: string, name: string, defaultBranch: strin
       return base
     }
 
-    const data = await res.json() as { workflow_runs: Array<{ status: string, conclusion: string | null, name: string, head_sha: string, head_commit: { message: string, author: { name: string } | null } | null, updated_at: string, html_url: string, actor: { login: string } | null }> }
+    const data = await res.json() as { workflow_runs: Array<{ id: number, status: string, conclusion: string | null, name: string, head_sha: string, head_commit: { message: string, author: { name: string } | null } | null, updated_at: string, html_url: string, actor: { login: string } | null }> }
 
     if (!data.workflow_runs || data.workflow_runs.length === 0) {
       await fillLatestCommit(base, owner, name, defaultBranch)
@@ -121,6 +140,10 @@ async function fetchRepoStatus(owner: string, name: string, defaultBranch: strin
     if (run.status === 'completed') {
       base.status = run.conclusion === 'success' ? 'success' : 'failure'
       base.conclusion = run.conclusion
+
+      if (base.status === 'failure') {
+        base.failedJobs = await fetchFailedJobs(owner, name, run.id)
+      }
     }
     else {
       base.status = 'pending'
