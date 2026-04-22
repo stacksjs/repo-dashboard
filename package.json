@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@cwcss/crosswind": "^0.2.0",
-    "@stacksjs/stx": "^0.2.10"
+    "@stacksjs/stx": "link:@stacksjs/stx"
   },
   "devDependencies": {
-    "bun-plugin-stx": "^0.2.10"
+    "bun-plugin-stx": "link:bun-plugin-stx"
   }
 }
