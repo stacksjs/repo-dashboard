@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "bun --watch serve.ts",
+    "build": "bun build.ts",
     "start": "bun serve.ts",
     "typecheck": "bun tsc --noEmit"
   },
