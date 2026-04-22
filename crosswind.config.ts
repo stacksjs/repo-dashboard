@@ -9,7 +9,7 @@ export default {
     'flex-col', 'flex-row', 'text-center', 'text-left',
     'items-center', 'justify-center', 'justify-between',
     'grid-cols-1', 'grid-cols-2', 'grid-cols-3',
-    'hidden', 'block',
+    'hidden', 'block', 'animate-pulse',
   ],
   theme: {
     extend: {

@@ -2,12 +2,46 @@
 
 @section('content')
   <script client>
-    const repos = state([])
+    const allRepos = state([])
     const loading = state(true)
     const error = state('')
     const total = state(0)
     const passing = state(0)
     const failing = state(0)
+    const activeTab = state('all')
+
+    const tabs = state([
+      { id: 'all', label: 'All' },
+      { id: 'stacksjs', label: 'stacksjs' },
+      { id: 'home-lang', label: 'home-lang' },
+      { id: 'mail-os', label: 'mail-os' },
+      { id: 'pickier', label: 'pickier' },
+      { id: 'cwcss', label: 'cwcss' },
+    ])
+
+    const repos = derived(() => {
+      const tab = activeTab()
+      const all = allRepos()
+      if (tab === 'all') return all
+      return all.filter(r => r.owner === tab)
+    })
+
+    const tabPassing = derived(() => repos().filter(r => r.status === 'success').length)
+    const tabFailing = derived(() => repos().filter(r => r.status === 'failure' || r.status === 'error').length)
+    const tabTotal = derived(() => repos().length)
+
+    function switchTab(id) {
+      activeTab.set(id)
+    }
+
+    function isActive(id) {
+      return activeTab() === id
+    }
+
+    function tabStyle(id) {
+      if (activeTab() === id) return 'border-color: #a78bfa; color: #e4e4e7'
+      return 'border-color: transparent; color: #71717a'
+    }
 
     function icon(status) {
       if (status === 'success') return '\u2713'
@@ -51,7 +85,7 @@
         const res = await fetch('/api/status')
         if (!res.ok) throw new Error('HTTP ' + res.status)
         const data = await res.json()
-        repos.set(data.repos)
+        allRepos.set(data.repos)
         total.set(data.total)
         passing.set(data.passing)
         failing.set(data.failing)
@@ -66,40 +100,85 @@
   </script>
 
   <div class="max-w-7xl mx-auto px-6 py-8">
-    <p :if="loading" class="text-zinc-500 text-sm">Loading repos...</p>
-
-    <p :if="error" class="text-red-400 text-sm">Failed to load: {{ error }}</p>
-
-    <div :if="!loading && !error" class="mb-6 flex items-center gap-4 text-sm text-zinc-400">
-      <span class="text-emerald-400 font-medium">{{ passing }} passing</span>
-      <span class="text-red-400 font-medium">{{ failing }} failing</span>
-      <span class="text-zinc-500">{{ total }} total</span>
+    <!-- Skeleton loading state -->
+    <div :if="loading" class="flex flex-col items-center justify-center" style="min-height: 60vh">
+      <div class="mb-8 text-center">
+        <div class="inline-flex items-center gap-3 mb-4">
+          <div class="w-5 h-5 border-2 border-zinc-600 border-t-violet-400 rounded-full" style="animation: spin 0.8s linear infinite"></div>
+          <span class="text-zinc-400 text-lg">Loading repositories...</span>
+        </div>
+        <p class="text-zinc-600 text-sm">Fetching CI status from GitHub</p>
+      </div>
+      <div class="w-full max-w-3xl grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr))">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
     </div>
 
-    <div :if="!loading && !error" class="grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr))">
-      <div
-        :for="repo in repos"
-        :style="borderColor(repo.status)"
-        class="flex items-start gap-3 px-4 py-3 rounded-lg border bg-zinc-900 hover:bg-zinc-800 transition-colors"
-      >
-        <span :style="iconColor(repo.status)" class="text-base font-bold mt-0.5" :text="icon(repo.status)"></span>
+    <!-- Error state -->
+    <div :if="error" class="flex items-center justify-center" style="min-height: 60vh">
+      <div class="text-center">
+        <p class="text-red-400 text-lg mb-2">Something went wrong</p>
+        <p class="text-zinc-500 text-sm">{{ error }}</p>
+      </div>
+    </div>
 
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2">
-            <a :href="repo.url" target="_blank" class="text-zinc-100 text-sm font-medium no-underline hover:underline" :text="repo.name"></a>
-            <span :if="repo.commitSha" class="text-zinc-600 text-xs font-mono" :text="repo.commitSha"></span>
-            <span :if="repo.updatedAt" class="text-zinc-600 text-xs" :text="timeAgo(repo.updatedAt)"></span>
-          </div>
+    <!-- Loaded state -->
+    <div :if="!loading && !error">
+      <!-- Tabs -->
+      <div class="flex items-center gap-1 mb-6 border-b border-zinc-800 overflow-x-auto">
+        <button
+          :for="tab in tabs"
+          @click="switchTab(tab.id)"
+          :style="tabStyle(tab.id)"
+          class="px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap bg-transparent cursor-pointer hover:text-zinc-300"
+          :text="tab.label"
+        ></button>
+      </div>
 
-          <div :if="repo.commitMessage" class="mt-1 flex items-center gap-2">
-            <a :href="repo.commitUrl || repo.url" target="_blank" class="text-zinc-400 text-xs no-underline hover:underline truncate" :text="truncate(repo.commitMessage, 50)"></a>
-          </div>
+      <!-- Summary -->
+      <div class="mb-5 flex items-center gap-4 text-sm text-zinc-400">
+        <span class="text-emerald-400 font-medium">{{ tabPassing }} passing</span>
+        <span class="text-red-400 font-medium">{{ tabFailing }} failing</span>
+        <span class="text-zinc-500">{{ tabTotal }} total</span>
+      </div>
 
-          <div :if="repo.commitAuthor" class="mt-0.5">
-            <span class="text-zinc-600 text-xs" :text="repo.commitAuthor"></span>
+      <!-- Repo grid -->
+      <div class="grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr))">
+        <div
+          :for="repo in repos"
+          :style="borderColor(repo.status)"
+          class="flex items-start gap-3 px-4 py-3 rounded-lg border bg-zinc-900 hover:bg-zinc-800 transition-colors"
+        >
+          <span :style="iconColor(repo.status)" class="text-base font-bold mt-0.5" :text="icon(repo.status)"></span>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <a :href="repo.url" target="_blank" class="text-zinc-100 text-sm font-medium no-underline hover:underline" :text="repo.name"></a>
+              <span :if="repo.commitSha" class="text-zinc-600 text-xs font-mono" :text="repo.commitSha"></span>
+              <span :if="repo.updatedAt" class="text-zinc-600 text-xs" :text="timeAgo(repo.updatedAt)"></span>
+            </div>
+
+            <div :if="repo.commitMessage" class="mt-1">
+              <a :href="repo.commitUrl || repo.url" target="_blank" class="text-zinc-400 text-xs no-underline hover:underline" :text="truncate(repo.commitMessage, 50)"></a>
+            </div>
+
+            <div :if="repo.commitAuthor" class="mt-0.5">
+              <span class="text-zinc-600 text-xs" :text="repo.commitAuthor"></span>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <style>
+    @keyframes spin {
+      to { transform: rotate(360deg) }
+    }
+  </style>
 @endsection

@@ -1,7 +1,7 @@
 import type { DashboardData, RepoStatus } from './types'
 
 const GITHUB_API = 'https://api.github.com'
-const ORGS = ['stacksjs', 'home-lang']
+const ORGS = ['stacksjs', 'home-lang', 'mail-os', 'pickier', 'cwcss']
 
 function getToken(): string {
   const token = process.env.GITHUB_TOKEN
