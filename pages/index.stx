@@ -48,16 +48,10 @@
     function switchTab(id) {
       activeTab.set(id)
     }
-    }
 
     function tabStyle(id) {
       if (activeTab() === id) return 'border-color: #a78bfa; color: #7c3aed'
       return 'border-color: transparent; color: #a1a1aa'
-    }
-
-    function tabStyleDark(id) {
-      if (activeTab() === id) return 'border-color: #a78bfa; color: #e4e4e7'
-      return 'border-color: transparent; color: #71717a'
     }
 
     function icon(status) {
