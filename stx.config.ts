@@ -1,21 +1,11 @@
 import { createApiRoutes } from './src/api'
 
-const apiRoutes = createApiRoutes()
-
 export default {
-  componentsDir: 'components',
-  layoutsDir: 'layouts',
-  partialsDir: 'partials',
-  pagesDir: 'pages',
-  publicDir: 'public',
-  storesDir: 'stores',
-
   app: {
     head: {
-      title: 'Repo Dashboard — Stacks CI Status',
+      title: 'Repo Dashboard',
       lang: 'en',
       meta: [
-        { name: 'description', content: 'Monitor CI status across all Stacks codebases.' },
         { name: 'theme-color', content: '#0a0a0a' },
       ],
       link: [
@@ -29,12 +19,5 @@ export default {
 
   css: './crosswind.config.ts',
   ssr: true,
-
-  router: {
-    container: 'main',
-    viewTransitions: true,
-    prefetch: true,
-  },
-
-  apiRoutes,
+  apiRoutes: createApiRoutes(),
 }
