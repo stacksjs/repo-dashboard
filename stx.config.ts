@@ -13,7 +13,7 @@ export default {
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap' },
       ],
-      bodyClass: 'bg-zinc-950 text-zinc-100 font-sans antialiased',
+      bodyClass: 'font-sans antialiased',
     },
   },
 

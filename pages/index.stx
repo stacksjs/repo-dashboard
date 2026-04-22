@@ -9,6 +9,7 @@
     const passing = state(0)
     const failing = state(0)
     const activeTab = state('all')
+    const statusFilter = state('all')
 
     const tabs = state([
       { id: 'all', label: 'All' },
@@ -21,24 +22,49 @@
 
     const repos = derived(() => {
       const tab = activeTab()
-      const all = allRepos()
-      if (tab === 'all') return all
-      return all.filter(r => r.owner === tab)
+      const filter = statusFilter()
+      let list = allRepos()
+      if (tab !== 'all') list = list.filter(r => r.owner === tab)
+      if (filter === 'passing') list = list.filter(r => r.status === 'success')
+      if (filter === 'failing') list = list.filter(r => r.status === 'failure' || r.status === 'error')
+      return list
     })
 
-    const tabPassing = derived(() => repos().filter(r => r.status === 'success').length)
-    const tabFailing = derived(() => repos().filter(r => r.status === 'failure' || r.status === 'error').length)
-    const tabTotal = derived(() => repos().length)
+    const tabPassing = derived(() => {
+      const tab = activeTab()
+      const list = tab === 'all' ? allRepos() : allRepos().filter(r => r.owner === tab)
+      return list.filter(r => r.status === 'success').length
+    })
+    const tabFailing = derived(() => {
+      const tab = activeTab()
+      const list = tab === 'all' ? allRepos() : allRepos().filter(r => r.owner === tab)
+      return list.filter(r => r.status === 'failure' || r.status === 'error').length
+    })
+    const tabTotal = derived(() => {
+      const tab = activeTab()
+      return tab === 'all' ? allRepos().length : allRepos().filter(r => r.owner === tab).length
+    })
 
     function switchTab(id) {
       activeTab.set(id)
+      statusFilter.set('all')
     }
 
-    function isActive(id) {
-      return activeTab() === id
+    function setFilter(f) {
+      statusFilter.set(f)
+    }
+
+    function filterStyle(f) {
+      if (statusFilter() === f) return 'background: rgba(139,92,246,0.15); color: #c4b5fd; border-color: rgba(139,92,246,0.4)'
+      return 'background: transparent; border-color: transparent'
     }
 
     function tabStyle(id) {
+      if (activeTab() === id) return 'border-color: #a78bfa; color: #7c3aed'
+      return 'border-color: transparent; color: #a1a1aa'
+    }
+
+    function tabStyleDark(id) {
       if (activeTab() === id) return 'border-color: #a78bfa; color: #e4e4e7'
       return 'border-color: transparent; color: #71717a'
     }
@@ -104,10 +130,10 @@
     <div :if="loading" class="flex flex-col items-center justify-center" style="min-height: 60vh">
       <div class="mb-8 text-center">
         <div class="inline-flex items-center gap-3 mb-4">
-          <div class="w-5 h-5 border-2 border-zinc-600 border-t-violet-400 rounded-full" style="animation: spin 0.8s linear infinite"></div>
-          <span class="text-zinc-400 text-lg">Loading repositories...</span>
+          <div class="w-5 h-5 border-2 border-zinc-300 dark:border-zinc-600 border-t-violet-500 dark:border-t-violet-400 rounded-full" style="animation: spin 0.8s linear infinite"></div>
+          <span class="text-zinc-500 dark:text-zinc-400 text-lg">Loading repositories...</span>
         </div>
-        <p class="text-zinc-600 text-sm">Fetching CI status from GitHub</p>
+        <p class="text-zinc-400 dark:text-zinc-600 text-sm">Fetching CI status from GitHub</p>
       </div>
       <div class="w-full max-w-3xl grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr))">
         <SkeletonCard />
@@ -122,7 +148,7 @@
     <!-- Error state -->
     <div :if="error" class="flex items-center justify-center" style="min-height: 60vh">
       <div class="text-center">
-        <p class="text-red-400 text-lg mb-2">Something went wrong</p>
+        <p class="text-red-500 text-lg mb-2">Something went wrong</p>
         <p class="text-zinc-500 text-sm">{{ error }}</p>
       </div>
     </div>
@@ -130,21 +156,33 @@
     <!-- Loaded state -->
     <div :if="!loading && !error">
       <!-- Tabs -->
-      <div class="flex items-center gap-1 mb-6 border-b border-zinc-800 overflow-x-auto">
+      <div class="flex items-center gap-1 mb-4 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto">
         <button
           :for="tab in tabs"
           @click="switchTab(tab.id)"
           :style="tabStyle(tab.id)"
-          class="px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap bg-transparent cursor-pointer hover:text-zinc-300"
+          class="px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap bg-transparent cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300"
           :text="tab.label"
         ></button>
       </div>
 
-      <!-- Summary -->
-      <div class="mb-5 flex items-center gap-4 text-sm text-zinc-400">
-        <span class="text-emerald-400 font-medium">{{ tabPassing }} passing</span>
-        <span class="text-red-400 font-medium">{{ tabFailing }} failing</span>
-        <span class="text-zinc-500">{{ tabTotal }} total</span>
+      <!-- Summary + filters -->
+      <div class="mb-5 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-4 text-sm">
+          <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ tabPassing }} passing</span>
+          <span class="text-red-500 dark:text-red-400 font-medium">{{ tabFailing }} failing</span>
+          <span class="text-zinc-400 dark:text-zinc-500">{{ tabTotal }} total</span>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button @click="setFilter('all')" :style="filterStyle('all')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors">All</button>
+          <button @click="setFilter('passing')" :style="filterStyle('passing')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors">
+            Passing
+          </button>
+          <button @click="setFilter('failing')" :style="filterStyle('failing')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors">
+            Failing
+          </button>
+        </div>
       </div>
 
       <!-- Repo grid -->
@@ -152,23 +190,23 @@
         <div
           :for="repo in repos"
           :style="borderColor(repo.status)"
-          class="flex items-start gap-3 px-4 py-3 rounded-lg border bg-zinc-900 hover:bg-zinc-800 transition-colors"
+          class="flex items-start gap-3 px-4 py-3 rounded-lg border bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
         >
           <span :style="iconColor(repo.status)" class="text-base font-bold mt-0.5" :text="icon(repo.status)"></span>
 
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
-              <a :href="repo.url" target="_blank" class="text-zinc-100 text-sm font-medium no-underline hover:underline" :text="repo.name"></a>
-              <span :if="repo.commitSha" class="text-zinc-600 text-xs font-mono" :text="repo.commitSha"></span>
-              <span :if="repo.updatedAt" class="text-zinc-600 text-xs" :text="timeAgo(repo.updatedAt)"></span>
+              <a :href="repo.url" target="_blank" class="text-zinc-900 dark:text-zinc-100 text-sm font-medium no-underline hover:underline" :text="repo.name"></a>
+              <span :if="repo.commitSha" class="text-zinc-400 dark:text-zinc-600 text-xs font-mono" :text="repo.commitSha"></span>
+              <span :if="repo.updatedAt" class="text-zinc-400 dark:text-zinc-600 text-xs" :text="timeAgo(repo.updatedAt)"></span>
             </div>
 
             <div :if="repo.commitMessage" class="mt-1">
-              <a :href="repo.commitUrl || repo.url" target="_blank" class="text-zinc-400 text-xs no-underline hover:underline" :text="truncate(repo.commitMessage, 50)"></a>
+              <a :href="repo.commitUrl || repo.url" target="_blank" class="text-zinc-500 dark:text-zinc-400 text-xs no-underline hover:underline" :text="truncate(repo.commitMessage, 50)"></a>
             </div>
 
             <div :if="repo.commitAuthor" class="mt-0.5">
-              <span class="text-zinc-600 text-xs" :text="repo.commitAuthor"></span>
+              <span class="text-zinc-400 dark:text-zinc-600 text-xs" :text="repo.commitAuthor"></span>
             </div>
           </div>
         </div>
