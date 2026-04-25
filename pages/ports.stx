@@ -1,0 +1,113 @@
+@extends('layouts/default')
+
+@section('content')
+  <script client>
+    const ports = state([])
+    const loading = state(true)
+    const killing = state(null)
+
+    async function loadPorts() {
+      loading.set(true)
+      try {
+        const res = await fetch('/api/ports')
+        const data = await res.json()
+        ports.set(data.ports)
+      }
+      catch (e) {
+        console.error('Failed to load ports:', e)
+      }
+      finally {
+        loading.set(false)
+      }
+    }
+
+    async function killPort(port) {
+      killing.set(port)
+      try {
+        const res = await fetch('/api/ports/kill', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ port }),
+        })
+        const result = await res.json()
+        if (result.success) {
+          await loadPorts()
+        }
+      }
+      catch (e) {
+        console.error('Failed to kill port:', e)
+      }
+      finally {
+        killing.set(null)
+      }
+    }
+
+    function statusDot(active) {
+      if (active) return 'background: #34d399'
+      return 'background: #3f3f46'
+    }
+
+    function isKilling(port) {
+      return killing() === port
+    }
+
+    onMount(() => {
+      loadPorts()
+    })
+  </script>
+
+  <div class="max-w-3xl mx-auto px-6 py-8">
+    <h1 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-6">Ports</h1>
+
+    <div :if="loading && ports().length === 0" class="flex items-center justify-center py-20">
+      <span class="text-zinc-400 dark:text-zinc-500 text-sm">Checking ports...</span>
+    </div>
+
+    <div :if="!loading || ports().length > 0">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-zinc-200 dark:border-zinc-800">
+            <th class="text-left text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider py-3 px-4">Port</th>
+            <th class="text-left text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider py-3 px-4">Status</th>
+            <th class="text-left text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider py-3 px-4">PID</th>
+            <th class="text-left text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider py-3 px-4">Command</th>
+            <th class="text-right text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider py-3 px-4"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            :for="p in ports"
+            class="border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+          >
+            <td class="py-3 px-4">
+              <span class="text-sm font-mono font-medium text-zinc-900 dark:text-zinc-100" :text="p.port"></span>
+            </td>
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full" :style="statusDot(p.active)"></div>
+                <span :if="p.active" class="text-sm text-emerald-600 dark:text-emerald-400">Active</span>
+                <span :if="!p.active" class="text-sm text-zinc-400 dark:text-zinc-600">Idle</span>
+              </div>
+            </td>
+            <td class="py-3 px-4">
+              <span :if="p.pid" class="text-sm font-mono text-zinc-500 dark:text-zinc-400" :text="p.pid"></span>
+              <span :if="!p.pid" class="text-sm text-zinc-300 dark:text-zinc-700">-</span>
+            </td>
+            <td class="py-3 px-4">
+              <span :if="p.command" class="text-xs text-zinc-500 dark:text-zinc-400 truncate block max-w-xs" :text="p.command"></span>
+              <span :if="!p.command" class="text-sm text-zinc-300 dark:text-zinc-700">-</span>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <button
+                :if="p.active"
+                @click="killPort(p.port)"
+                class="px-3 py-1 text-xs font-medium rounded bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 cursor-pointer transition-colors"
+                :text="isKilling(p.port) ? 'Killing...' : 'Kill'"
+              ></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+@endsection

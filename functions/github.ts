@@ -107,6 +107,10 @@ async function fetchRepoStatus(owner: string, name: string, defaultBranch: strin
     updatedAt: null,
     runUrl: null,
     failedJobs: [],
+    renovatePRs: 0,
+    renovatePRsUrl: null,
+    actionsPRs: 0,
+    actionsPRsUrl: null,
   }
 
   try {
@@ -157,6 +161,33 @@ async function fetchRepoStatus(owner: string, name: string, defaultBranch: strin
   return base
 }
 
+async function fetchBotPRCounts(org: string, authorSlug: string): Promise<Map<string, number>> {
+  const counts = new Map<string, number>()
+  let page = 1
+
+  while (true) {
+    const q = `is:pr is:open org:${org} author:app/${authorSlug}`
+    const res = await fetch(
+      `${GITHUB_API}/search/issues?q=${encodeURIComponent(q)}&per_page=100&page=${page}`,
+      { headers: headers() },
+    )
+    if (!res.ok) break
+
+    const data = await res.json() as { items: Array<{ repository_url: string }>, total_count: number }
+    if (!data.items || data.items.length === 0) break
+
+    for (const item of data.items) {
+      const fullName = item.repository_url.replace(`${GITHUB_API}/repos/`, '')
+      counts.set(fullName, (counts.get(fullName) ?? 0) + 1)
+    }
+
+    if (data.items.length < 100) break
+    page++
+  }
+
+  return counts
+}
+
 // Simple in-memory cache (refreshes every 2 minutes)
 let cache: DashboardData | null = null
 let cacheTime = 0
@@ -172,6 +203,30 @@ export async function getDashboardData(): Promise<DashboardData> {
   const statuses = await Promise.all(
     repos.map(r => fetchRepoStatus(r.owner, r.name, r.default_branch)),
   )
+
+  const prCountMaps = await Promise.all(
+    ORGS.flatMap(org => [
+      fetchBotPRCounts(org, 'renovate').then(m => ({ type: 'renovate' as const, map: m })),
+      fetchBotPRCounts(org, 'github-actions').then(m => ({ type: 'actions' as const, map: m })),
+    ]),
+  )
+  const renovateCounts = new Map<string, number>()
+  const actionsCounts = new Map<string, number>()
+  for (const { type, map } of prCountMaps) {
+    const target = type === 'renovate' ? renovateCounts : actionsCounts
+    for (const [k, v] of map) target.set(k, (target.get(k) ?? 0) + v)
+  }
+
+  for (const s of statuses) {
+    const rCount = renovateCounts.get(s.fullName) ?? 0
+    const aCount = actionsCounts.get(s.fullName) ?? 0
+    s.renovatePRs = rCount
+    s.actionsPRs = aCount
+    if (rCount > 0)
+      s.renovatePRsUrl = `https://github.com/${s.fullName}/pulls?q=${encodeURIComponent('is:pr is:open author:app/renovate')}`
+    if (aCount > 0)
+      s.actionsPRsUrl = `https://github.com/${s.fullName}/pulls?q=${encodeURIComponent('is:pr is:open author:app/github-actions')}`
+  }
 
   // Sort: failures first, then pending, then success, then no_runs
   const order: Record<string, number> = { failure: 0, error: 1, pending: 2, success: 3, no_runs: 4 }

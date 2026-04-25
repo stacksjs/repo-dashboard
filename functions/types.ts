@@ -21,6 +21,10 @@ export interface RepoStatus {
   updatedAt: string | null
   runUrl: string | null
   failedJobs: FailedJob[]
+  renovatePRs: number
+  renovatePRsUrl: string | null
+  actionsPRs: number
+  actionsPRsUrl: string | null
 }
 
 export interface DashboardData {

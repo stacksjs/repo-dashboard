@@ -169,6 +169,28 @@
               <span class="text-zinc-400 dark:text-zinc-600 text-xs" :text="repo.commitAuthor"></span>
             </div>
 
+            <div :if="repo.renovatePRs > 0 || repo.actionsPRs > 0" class="mt-2 pt-2 border-t border-zinc-200/60 dark:border-zinc-800">
+              <div class="text-zinc-400 dark:text-zinc-600 text-xs mb-1">Pull Requests</div>
+              <div class="flex flex-wrap gap-x-3 gap-y-0.5">
+                <a
+                  :if="repo.renovatePRs > 0"
+                  :href="repo.renovatePRsUrl"
+                  target="_blank"
+                  class="text-zinc-500 dark:text-zinc-400 text-xs no-underline hover:underline"
+                >
+                  renovatebot: <span :text="repo.renovatePRs"></span>
+                </a>
+                <a
+                  :if="repo.actionsPRs > 0"
+                  :href="repo.actionsPRsUrl"
+                  target="_blank"
+                  class="text-zinc-500 dark:text-zinc-400 text-xs no-underline hover:underline"
+                >
+                  github-actions: <span :text="repo.actionsPRs"></span>
+                </a>
+              </div>
+            </div>
+
             <div :if="repo.failedJobs && repo.failedJobs.length > 0" class="mt-2 pt-2 border-t border-red-500/10">
               <a
                 :for="job in repo.failedJobs"

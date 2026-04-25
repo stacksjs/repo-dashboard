@@ -38,9 +38,12 @@
 
 <header class="border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
   <div class="max-w-7xl mx-auto flex items-center justify-between">
-    <a href="/" class="flex items-center gap-3 no-underline">
-      <span class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Repo Dashboard</span>
-    </a>
+    <div class="flex items-center gap-6">
+      <a href="/" class="flex items-center gap-3 no-underline">
+        <span class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Repo Dashboard</span>
+      </a>
+      <a href="/ports" class="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 no-underline transition-colors">Ports</a>
+    </div>
 
     <div class="flex items-center gap-2">
       <button @click="setFilter('all')" :class="filterBtnClass('all')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">All</button>
