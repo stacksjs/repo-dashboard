@@ -1,5 +1,6 @@
 node_modules
 .stx
 .output
+.cache
 dist
 .env

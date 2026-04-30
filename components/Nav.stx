@@ -1,6 +1,10 @@
 <script client>
+  import { useSelection, useDashboard } from '@stores'
+
   const isDark = state(true)
   const activeFilter = state('all')
+  const selection = useSelection
+  const dashboard = useDashboard
 
   onMount(() => {
     const stored = localStorage.getItem('theme')
@@ -34,6 +38,22 @@
     if (activeFilter() === f) return 'bg-violet-500/15 text-violet-400 border-violet-500/40'
     return 'bg-transparent text-zinc-500 dark:text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-200'
   }
+
+  function promptBtnLabel() {
+    const s = selection.copyState()
+    if (s === 'copied') return 'Copied!'
+    if (s === 'empty') return 'Nothing to copy'
+    const n = selection.count()
+    return n > 0 ? 'Generate Prompt (' + n + ')' : 'Generate Prompt'
+  }
+
+  function promptBtnClass() {
+    const s = selection.copyState()
+    if (s === 'copied') return 'bg-emerald-500/15 text-emerald-500 border-emerald-500/40'
+    if (s === 'empty') return 'bg-zinc-500/10 text-zinc-500 border-zinc-500/30'
+    if (selection.count() > 0) return 'bg-violet-500/15 text-violet-400 border-violet-500/40 hover:bg-violet-500/25'
+    return 'bg-transparent text-zinc-500 dark:text-zinc-400 border-zinc-300 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-200'
+  }
 </script>
 
 <header class="border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
@@ -49,6 +69,11 @@
       <button @click="setFilter('all')" :class="filterBtnClass('all')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">All</button>
       <button @click="setFilter('passing')" :class="filterBtnClass('passing')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">Passing</button>
       <button @click="setFilter('failing')" :class="filterBtnClass('failing')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">Failing</button>
+      <button @click="setFilter('pending')" :class="filterBtnClass('pending')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">In Progress</button>
+
+      <div class="w-px h-5 bg-zinc-200 dark:bg-zinc-700 mx-1"></div>
+
+      <button @click="selection.generatePrompt(dashboard.allRepos())" :class="promptBtnClass()" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors" :text="promptBtnLabel()"></button>
 
       <div class="w-px h-5 bg-zinc-200 dark:bg-zinc-700 mx-1"></div>
 

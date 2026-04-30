@@ -19,5 +19,6 @@ export default {
 
   css: './crosswind.config.ts',
   ssr: true,
+  storesDir: 'stores',
   apiRoutes: createApiRoutes(),
 }

@@ -27,6 +27,12 @@ export interface RepoStatus {
   actionsPRsUrl: string | null
 }
 
+export interface OrgRunnerUsage {
+  running: number
+  queued: number
+  cap: number
+}
+
 export interface DashboardData {
   repos: RepoStatus[]
   fetchedAt: string
@@ -35,4 +41,5 @@ export interface DashboardData {
   failing: number
   pending: number
   noRuns: number
+  runners: Record<string, OrgRunnerUsage>
 }

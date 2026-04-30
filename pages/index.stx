@@ -2,12 +2,16 @@
 
 @section('content')
   <script client>
-    const allRepos = state([])
-    const loading = state(true)
-    const error = state('')
-    const total = state(0)
-    const passing = state(0)
-    const failing = state(0)
+    import { useDashboard, useSelection } from '@stores'
+
+    const dashboard = useDashboard
+    const selection = useSelection
+
+    // Lift store signals to top-level deriveds so template :if/:text auto-unwrap them
+    const loading = derived(() => dashboard.loading())
+    const error = derived(() => dashboard.error())
+    const allRepos = derived(() => dashboard.allRepos())
+
     const activeTab = state('stacksjs')
     const statusFilter = state('all')
 
@@ -25,6 +29,7 @@
       let list = allRepos().filter(r => r.owner === tab)
       if (filter === 'passing') list = list.filter(r => r.status === 'success')
       if (filter === 'failing') list = list.filter(r => r.status === 'failure' || r.status === 'error')
+      if (filter === 'pending') list = list.filter(r => r.status === 'pending')
       return list
     })
 
@@ -41,6 +46,13 @@
     const tabTotal = derived(() => {
       const tab = activeTab()
       return tab === 'all' ? allRepos().length : allRepos().filter(r => r.owner === tab).length
+    })
+    const tabPassingText = derived(() => tabPassing() + ' passing')
+    const tabFailingText = derived(() => tabFailing() + ' failing')
+    const tabTotalText = derived(() => tabTotal() + ' total')
+    const tabRunnersText = derived(() => {
+      const r = dashboard.runners()[activeTab()] || { running: 0, queued: 0, cap: 20 }
+      return 'Runners: ' + r.running + ' running, ' + r.queued + ' queued / ' + r.cap + ' cap'
     })
 
     function switchTab(id) {
@@ -80,26 +92,11 @@
       return str.length > len ? str.slice(0, len) + '...' : str
     }
 
-    onMount(async () => {
+    onMount(() => {
       window.addEventListener('repo-filter', (e) => {
         statusFilter.set(e.detail)
       })
-
-      try {
-        const res = await fetch('/api/status')
-        if (!res.ok) throw new Error('HTTP ' + res.status)
-        const data = await res.json()
-        allRepos.set(data.repos)
-        total.set(data.total)
-        passing.set(data.passing)
-        failing.set(data.failing)
-      }
-      catch (e) {
-        error.set(String(e))
-      }
-      finally {
-        loading.set(false)
-      }
+      dashboard.load()
     })
   </script>
 
@@ -136,10 +133,12 @@
       </div>
 
       <!-- Summary -->
-      <div class="mb-5 flex items-center gap-4 text-sm">
-        <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ tabPassing }} passing</span>
-        <span class="text-red-500 dark:text-red-400 font-medium">{{ tabFailing }} failing</span>
-        <span class="text-zinc-400 dark:text-zinc-500">{{ tabTotal }} total</span>
+      <div class="mb-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+        <span class="text-emerald-600 dark:text-emerald-400 font-medium" :text="tabPassingText"></span>
+        <span class="text-red-500 dark:text-red-400 font-medium" :text="tabFailingText"></span>
+        <span class="text-zinc-400 dark:text-zinc-500" :text="tabTotalText"></span>
+        <span class="text-zinc-300 dark:text-zinc-700">·</span>
+        <span class="text-zinc-500 dark:text-zinc-400" :text="tabRunnersText"></span>
       </div>
 
       <!-- Repo grid -->
@@ -149,6 +148,13 @@
           :style="borderColor(repo.status)"
           class="flex items-start gap-3 px-4 py-3 rounded-lg border bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
         >
+          <input
+            type="checkbox"
+            :checked="selection.has(repo.fullName)"
+            @change="selection.toggle(repo.fullName)"
+            class="mt-1 cursor-pointer accent-violet-500"
+            title="Select for prompt"
+          />
           <Icon name="check" size="16" class="text-emerald-500 mt-0.5" :show="isSuccess(repo.status)" />
           <Icon name="x" size="16" class="text-red-500 mt-0.5" :show="isFailing(repo.status)" />
           <Icon name="loader" size="16" class="text-yellow-500 mt-0.5" :show="isPending(repo.status)" />
