@@ -56,28 +56,28 @@
   }
 </script>
 
-<header class="border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
-  <div class="max-w-7xl mx-auto flex items-center justify-between">
-    <div class="flex items-center gap-6">
-      <a href="/" class="flex items-center gap-3 no-underline">
-        <span class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Repo Dashboard</span>
+<header class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
+  <div class="flex items-center justify-between mx-auto max-w-7xl">
+    <div class="flex gap-6 items-center">
+      <a href="/" class="flex gap-3 items-center no-underline">
+        <span class="font-semibold text-lg text-zinc-900 dark:text-zinc-100">Repo Dashboard</span>
       </a>
-      <a href="/ports" class="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 no-underline transition-colors">Ports</a>
+      <a href="/ports" class="no-underline text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors">Ports</a>
     </div>
 
-    <div class="flex items-center gap-2">
-      <button @click="setFilter('all')" :class="filterBtnClass('all')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">All</button>
-      <button @click="setFilter('passing')" :class="filterBtnClass('passing')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">Passing</button>
-      <button @click="setFilter('failing')" :class="filterBtnClass('failing')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">Failing</button>
-      <button @click="setFilter('pending')" :class="filterBtnClass('pending')" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors">In Progress</button>
+    <div class="flex gap-2 items-center">
+      <button @click="setFilter('all')" :class="filterBtnClass('all')" class="px-3 py-1 font-medium text-xs border rounded-full transition-colors cursor-pointer">All</button>
+      <button @click="setFilter('passing')" :class="filterBtnClass('passing')" class="px-3 py-1 font-medium text-xs border rounded-full transition-colors cursor-pointer">Passing</button>
+      <button @click="setFilter('failing')" :class="filterBtnClass('failing')" class="px-3 py-1 font-medium text-xs border rounded-full transition-colors cursor-pointer">Failing</button>
+      <button @click="setFilter('pending')" :class="filterBtnClass('pending')" class="px-3 py-1 font-medium text-xs border rounded-full transition-colors cursor-pointer">In Progress</button>
 
-      <div class="w-px h-5 bg-zinc-200 dark:bg-zinc-700 mx-1"></div>
+      <div class="mx-1 h-5 w-px bg-zinc-200 dark:bg-zinc-700"></div>
 
-      <button @click="selection.generatePrompt(dashboard.allRepos())" :class="promptBtnClass()" class="px-3 py-1 text-xs font-medium rounded-full border cursor-pointer transition-colors" :text="promptBtnLabel()"></button>
+      <button @click="selection.generatePrompt(dashboard.allRepos())" :class="promptBtnClass()" class="px-3 py-1 font-medium text-xs border rounded-full transition-colors cursor-pointer" :text="promptBtnLabel()"></button>
 
-      <div class="w-px h-5 bg-zinc-200 dark:bg-zinc-700 mx-1"></div>
+      <div class="mx-1 h-5 w-px bg-zinc-200 dark:bg-zinc-700"></div>
 
-      <button @click="toggleTheme()" class="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded transition-colors bg-transparent cursor-pointer">
+      <button @click="toggleTheme()" class="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-transparent rounded transition-colors cursor-pointer">
         <Icon name="moon" size="18" :show="isDark" />
         <Icon name="sun" size="18" :show="!isDark" />
       </button>

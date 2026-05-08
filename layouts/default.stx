@@ -1,4 +1,4 @@
-<div class="min-h-screen flex flex-col bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
+<div class="flex flex-col min-h-screen text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-950">
   <Nav />
 
   <main class="flex-1">

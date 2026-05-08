@@ -100,42 +100,42 @@
     })
   </script>
 
-  <div class="max-w-7xl mx-auto px-6 py-8">
+  <div class="mx-auto px-6 py-8 max-w-7xl">
     <!-- Loading state -->
     <div :if="loading" class="flex items-center justify-center" style="min-height: 70vh">
-      <div class="flex flex-col items-center gap-4">
+      <div class="flex flex-col gap-4 items-center">
         <svg class="text-violet-500" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 0.8s linear infinite">
           <path d="M21 12a9 9 0 1 1-6.219-8.56" />
         </svg>
-        <span class="text-zinc-400 dark:text-zinc-500 text-sm">Fetching CI status...</span>
+        <span class="text-sm text-zinc-400 dark:text-zinc-500">Fetching CI status...</span>
       </div>
     </div>
 
     <!-- Error state -->
     <div :if="error" class="flex items-center justify-center" style="min-height: 60vh">
       <div class="text-center">
-        <p class="text-red-500 text-lg mb-2">Something went wrong</p>
-        <p class="text-zinc-500 text-sm">{{ error }}</p>
+        <p class="mb-2 text-lg text-red-500">Something went wrong</p>
+        <p class="text-sm text-zinc-500">{{ error }}</p>
       </div>
     </div>
 
     <!-- Loaded state -->
     <div :if="!loading && !error">
       <!-- Tabs -->
-      <div class="flex items-center gap-1 mb-4 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto">
+      <div class="flex overflow-x-auto gap-1 items-center mb-4 border-b border-zinc-200 dark:border-zinc-800">
         <button
           :for="tab in tabs"
           @click="switchTab(tab.id)"
           :style="tabStyle(tab.id)"
-          class="px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap bg-transparent cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300"
+          class="px-4 py-2 font-medium text-sm whitespace-nowrap hover:text-zinc-700 dark:hover:text-zinc-300 bg-transparent border-b-2 transition-colors cursor-pointer"
           :text="tab.label"
         ></button>
       </div>
 
       <!-- Summary -->
-      <div class="mb-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-        <span class="text-emerald-600 dark:text-emerald-400 font-medium" :text="tabPassingText"></span>
-        <span class="text-red-500 dark:text-red-400 font-medium" :text="tabFailingText"></span>
+      <div class="flex flex-wrap gap-x-4 gap-y-1 items-center mb-5 text-sm">
+        <span class="font-medium text-emerald-600 dark:text-emerald-400" :text="tabPassingText"></span>
+        <span class="font-medium text-red-500 dark:text-red-400" :text="tabFailingText"></span>
         <span class="text-zinc-400 dark:text-zinc-500" :text="tabTotalText"></span>
         <span class="text-zinc-300 dark:text-zinc-700">·</span>
         <span class="text-zinc-500 dark:text-zinc-400" :text="tabRunnersText"></span>
@@ -146,43 +146,43 @@
         <div
           :for="repo in repos"
           :style="borderColor(repo.status)"
-          class="flex items-start gap-3 px-4 py-3 rounded-lg border bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          class="flex gap-3 items-start px-4 py-3 bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 border rounded-lg transition-colors"
         >
           <input
             type="checkbox"
             :checked="selection.has(repo.fullName)"
             @change="selection.toggle(repo.fullName)"
-            class="mt-1 cursor-pointer accent-violet-500"
+            class="mt-1 accent-violet-500 cursor-pointer"
             title="Select for prompt"
           />
-          <Icon name="check" size="16" class="text-emerald-500 mt-0.5" :show="isSuccess(repo.status)" />
-          <Icon name="x" size="16" class="text-red-500 mt-0.5" :show="isFailing(repo.status)" />
-          <Icon name="loader" size="16" class="text-yellow-500 mt-0.5" :show="isPending(repo.status)" />
-          <Icon name="minus" size="16" class="text-zinc-600 mt-0.5" :show="isNoRuns(repo.status)" />
+          <Icon name="check" size="16" class="mt-0.5 text-emerald-500" :show="isSuccess(repo.status)" />
+          <Icon name="x" size="16" class="mt-0.5 text-red-500" :show="isFailing(repo.status)" />
+          <Icon name="loader" size="16" class="mt-0.5 text-yellow-500" :show="isPending(repo.status)" />
+          <Icon name="minus" size="16" class="mt-0.5 text-zinc-600" :show="isNoRuns(repo.status)" />
 
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <a :href="repo.url" target="_blank" class="text-zinc-900 dark:text-zinc-100 text-sm font-medium no-underline hover:underline" :text="repo.name"></a>
-              <span :if="repo.commitSha" class="text-zinc-400 dark:text-zinc-600 text-xs font-mono" :text="repo.commitSha"></span>
-              <span :if="repo.updatedAt" class="text-zinc-400 dark:text-zinc-600 text-xs" :text="timeAgo(repo.updatedAt)"></span>
+            <div class="flex gap-2 items-center">
+              <a :href="repo.url" target="_blank" class="font-medium no-underline text-sm text-zinc-900 dark:text-zinc-100 hover:underline" :text="repo.name"></a>
+              <span :if="repo.commitSha" class="font-mono text-xs text-zinc-400 dark:text-zinc-600" :text="repo.commitSha"></span>
+              <span :if="repo.updatedAt" class="text-xs text-zinc-400 dark:text-zinc-600" :text="timeAgo(repo.updatedAt)"></span>
             </div>
 
             <div :if="repo.commitMessage" class="mt-1">
-              <a :href="repo.commitUrl || repo.url" target="_blank" class="text-zinc-500 dark:text-zinc-400 text-xs no-underline hover:underline" :text="truncate(repo.commitMessage, 50)"></a>
+              <a :href="repo.commitUrl || repo.url" target="_blank" class="no-underline text-xs text-zinc-500 dark:text-zinc-400 hover:underline" :text="truncate(repo.commitMessage, 50)"></a>
             </div>
 
             <div :if="repo.commitAuthor" class="mt-0.5">
-              <span class="text-zinc-400 dark:text-zinc-600 text-xs" :text="repo.commitAuthor"></span>
+              <span class="text-xs text-zinc-400 dark:text-zinc-600" :text="repo.commitAuthor"></span>
             </div>
 
             <div :if="repo.renovatePRs > 0 || repo.actionsPRs > 0" class="mt-2 pt-2 border-t border-zinc-200/60 dark:border-zinc-800">
-              <div class="text-zinc-400 dark:text-zinc-600 text-xs mb-1">Pull Requests</div>
+              <div class="mb-1 text-xs text-zinc-400 dark:text-zinc-600">Pull Requests</div>
               <div class="flex flex-wrap gap-x-3 gap-y-0.5">
                 <a
                   :if="repo.renovatePRs > 0"
                   :href="repo.renovatePRsUrl"
                   target="_blank"
-                  class="text-zinc-500 dark:text-zinc-400 text-xs no-underline hover:underline"
+                  class="no-underline text-xs text-zinc-500 dark:text-zinc-400 hover:underline"
                 >
                   renovatebot: <span :text="repo.renovatePRs"></span>
                 </a>
@@ -190,22 +190,22 @@
                   :if="repo.actionsPRs > 0"
                   :href="repo.actionsPRsUrl"
                   target="_blank"
-                  class="text-zinc-500 dark:text-zinc-400 text-xs no-underline hover:underline"
+                  class="no-underline text-xs text-zinc-500 dark:text-zinc-400 hover:underline"
                 >
                   github-actions: <span :text="repo.actionsPRs"></span>
                 </a>
               </div>
             </div>
 
-            <div :if="repo.failedJobs && repo.failedJobs.length > 0" class="mt-2 pt-2 border-t border-red-500/10">
+            <div :if="repo.failedJobs && repo.failedJobs.length > 0" class="mt-2 pt-2 border-red-500/10 border-t">
               <a
                 :for="job in repo.failedJobs"
                 :href="job.url"
                 target="_blank"
-                class="flex items-center gap-1.5 mt-1 no-underline hover:underline group"
+                class="flex gap-1.5 items-center mt-1 no-underline hover:underline group"
               >
                 <Icon name="x-circle" size="12" class="text-red-400/70" />
-                <span class="text-red-400/80 dark:text-red-400/70 text-xs" :text="job.name"></span>
+                <span class="text-red-400/80 text-xs dark:text-red-400/70" :text="job.name"></span>
               </a>
             </div>
           </div>

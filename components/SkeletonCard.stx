@@ -1,7 +1,7 @@
-<div class="flex items-start gap-3 px-4 py-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 animate-pulse">
-  <div class="w-4 h-4 rounded-full bg-zinc-200 dark:bg-zinc-700 mt-0.5"></div>
+<div class="flex gap-3 items-start px-4 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 rounded-lg dark:border-zinc-800 animate-pulse">
+  <div class="mt-0.5 h-4 w-4 bg-zinc-200 dark:bg-zinc-700 rounded-full"></div>
   <div class="flex-1 min-w-0">
-    <div class="flex items-center gap-2">
+    <div class="flex gap-2 items-center">
       <div class="h-4 w-24 bg-zinc-200 dark:bg-zinc-700 rounded"></div>
       <div class="h-3 w-14 bg-zinc-100 dark:bg-zinc-800 rounded"></div>
       <div class="h-3 w-10 bg-zinc-100 dark:bg-zinc-800 rounded"></div>

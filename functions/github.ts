@@ -255,7 +255,7 @@ async function fetchRepoActiveRuns(owner: string, name: string): Promise<{ runni
 
 // Cache persisted to disk so `bun --watch` restarts don't lose it (and the API never blocks)
 const CACHE_FILE = '.cache/dashboard.json'
-const CACHE_TTL = 2 * 60 * 1000
+const CACHE_TTL = 30 * 1000
 let cache: DashboardData | null = null
 let cacheTime = 0
 let inflight: Promise<DashboardData> | null = null

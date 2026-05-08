@@ -56,52 +56,52 @@
     })
   </script>
 
-  <div class="max-w-3xl mx-auto px-6 py-8">
-    <h1 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-6">Ports</h1>
+  <div class="mx-auto px-6 py-8 max-w-3xl">
+    <h1 class="mb-6 font-semibold text-xl text-zinc-900 dark:text-zinc-100">Ports</h1>
 
     <div :if="loading && ports().length === 0" class="flex items-center justify-center py-20">
-      <span class="text-zinc-400 dark:text-zinc-500 text-sm">Checking ports...</span>
+      <span class="text-sm text-zinc-400 dark:text-zinc-500">Checking ports...</span>
     </div>
 
     <div :if="!loading || ports().length > 0">
       <table class="w-full">
         <thead>
           <tr class="border-b border-zinc-200 dark:border-zinc-800">
-            <th class="text-left text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider py-3 px-4">Port</th>
-            <th class="text-left text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider py-3 px-4">Status</th>
-            <th class="text-left text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider py-3 px-4">PID</th>
-            <th class="text-left text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider py-3 px-4">Command</th>
-            <th class="text-right text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider py-3 px-4"></th>
+            <th class="px-4 py-3 font-medium text-left text-xs text-zinc-400 tracking-wider uppercase dark:text-zinc-500">Port</th>
+            <th class="px-4 py-3 font-medium text-left text-xs text-zinc-400 tracking-wider uppercase dark:text-zinc-500">Status</th>
+            <th class="px-4 py-3 font-medium text-left text-xs text-zinc-400 tracking-wider uppercase dark:text-zinc-500">PID</th>
+            <th class="px-4 py-3 font-medium text-left text-xs text-zinc-400 tracking-wider uppercase dark:text-zinc-500">Command</th>
+            <th class="px-4 py-3 font-medium text-right text-xs text-zinc-400 tracking-wider uppercase dark:text-zinc-500"></th>
           </tr>
         </thead>
         <tbody>
           <tr
             :for="p in ports"
-            class="border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+            class="hover:bg-zinc-50 dark:hover:bg-zinc-900 border-b border-zinc-100 dark:border-zinc-800/50 transition-colors"
           >
-            <td class="py-3 px-4">
-              <span class="text-sm font-mono font-medium text-zinc-900 dark:text-zinc-100" :text="p.port"></span>
+            <td class="px-4 py-3">
+              <span class="font-medium font-mono text-sm text-zinc-900 dark:text-zinc-100" :text="p.port"></span>
             </td>
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full" :style="statusDot(p.active)"></div>
-                <span :if="p.active" class="text-sm text-emerald-600 dark:text-emerald-400">Active</span>
+            <td class="px-4 py-3">
+              <div class="flex gap-2 items-center">
+                <div class="h-2 w-2 rounded-full" :style="statusDot(p.active)"></div>
+                <span :if="p.active" class="text-emerald-600 text-sm dark:text-emerald-400">Active</span>
                 <span :if="!p.active" class="text-sm text-zinc-400 dark:text-zinc-600">Idle</span>
               </div>
             </td>
-            <td class="py-3 px-4">
-              <span :if="p.pid" class="text-sm font-mono text-zinc-500 dark:text-zinc-400" :text="p.pid"></span>
+            <td class="px-4 py-3">
+              <span :if="p.pid" class="font-mono text-sm text-zinc-500 dark:text-zinc-400" :text="p.pid"></span>
               <span :if="!p.pid" class="text-sm text-zinc-300 dark:text-zinc-700">-</span>
             </td>
-            <td class="py-3 px-4">
-              <span :if="p.command" class="text-xs text-zinc-500 dark:text-zinc-400 truncate block max-w-xs" :text="p.command"></span>
+            <td class="px-4 py-3">
+              <span :if="p.command" class="block max-w-xs text-xs text-zinc-500 truncate dark:text-zinc-400" :text="p.command"></span>
               <span :if="!p.command" class="text-sm text-zinc-300 dark:text-zinc-700">-</span>
             </td>
-            <td class="py-3 px-4 text-right">
+            <td class="px-4 py-3 text-right">
               <button
                 :if="p.active"
                 @click="killPort(p.port)"
-                class="px-3 py-1 text-xs font-medium rounded bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 cursor-pointer transition-colors"
+                class="px-3 py-1 font-medium text-red-500 text-xs bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded transition-colors cursor-pointer"
                 :text="isKilling(p.port) ? 'Killing...' : 'Kill'"
               ></button>
             </td>
